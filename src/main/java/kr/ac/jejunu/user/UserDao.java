@@ -13,14 +13,16 @@ public class UserDao {
         //Class.forName("com.mysql.cj.jdbc.Driver");
         //Connection connection = DriverManager.getConnection("jdbc:mysql://localhost/jeju", "root", "0000");
         //Connection connection = getConnection();
+        StatementStrategy statementStrategy = new FindStatementStrategy(id);
         Connection connection = null;
         PreparedStatement preparedStatement = null;
         ResultSet resultSet = null;
         User user = null;
         try {
             connection = dataSource.getConnection();
-            preparedStatement = connection.prepareStatement("select id, name, password from userinfo where id = ?");
-            preparedStatement.setLong(1, id);
+            //preparedStatement = connection.prepareStatement("select id, name, password from userinfo where id = ?");
+            //preparedStatement.setLong(1, id);
+            preparedStatement = statementStrategy.makeStatement(connection);
             resultSet = preparedStatement.executeQuery();
             if (resultSet.next()) {
                 user = new User();
@@ -52,16 +54,18 @@ public class UserDao {
         //Class.forName("com.mysql.cj.jdbc.Driver");
         //Connection connection = DriverManager.getConnection("jdbc:mysql://localhost/jeju", "root", "0000");
         //Connection connection = getConnection();
+        StatementStrategy statementStrategy = new InsertStatementStrategy(user);
         Connection connection = null;
         PreparedStatement preparedStatement = null;
         ResultSet resultSet = null;
         try {
             connection = dataSource.getConnection();
-            preparedStatement = connection.prepareStatement
-                    ("insert into userinfo (name, password) values ( ?, ? )"
-                            , Statement.RETURN_GENERATED_KEYS);
-            preparedStatement.setString(1, user.getName());
-            preparedStatement.setString(2, user.getPassword());
+            //preparedStatement = connection.prepareStatement
+            //        ("insert into userinfo (name, password) values ( ?, ? )"
+            //                , Statement.RETURN_GENERATED_KEYS);
+            //preparedStatement.setString(1, user.getName());
+            //preparedStatement.setString(2, user.getPassword());
+            preparedStatement = statementStrategy.makeStatement(connection);
             preparedStatement.executeUpdate();
             resultSet = preparedStatement.getGeneratedKeys();
             resultSet.next();
@@ -86,15 +90,17 @@ public class UserDao {
     }
 
     public void update(User user) throws SQLException {
+        StatementStrategy statementStrategy = new UpdateStatementStrategy(user);
         Connection connection = null;
         PreparedStatement preparedStatement = null;
         try {
             connection = dataSource.getConnection();
-            preparedStatement = connection.prepareStatement
-                    ("update userinfo set name = ?, password = ? where id = ?");
-            preparedStatement.setString(1, user.getName());
-            preparedStatement.setString(2, user.getPassword());
-            preparedStatement.setLong(3, user.getId());
+            //preparedStatement = connection.prepareStatement
+            //        ("update userinfo set name = ?, password = ? where id = ?");
+            //preparedStatement.setString(1, user.getName());
+            //preparedStatement.setString(2, user.getPassword());
+            //preparedStatement.setLong(3, user.getId());
+            preparedStatement = statementStrategy.makeStatement(connection);
             preparedStatement.executeUpdate();
         } finally {
             try {
@@ -111,13 +117,15 @@ public class UserDao {
     }
 
     public void delete(Long id) throws SQLException {
+        StatementStrategy statementStrategy = new DeleteStatementStrategy(id);
         Connection connection = null;
         PreparedStatement preparedStatement = null;
         try {
             connection = dataSource.getConnection();
-            preparedStatement = connection.prepareStatement
-                    ("delete from userinfo where id = ?");
-            preparedStatement.setLong(1, id);
+            //preparedStatement = connection.prepareStatement
+            //        ("delete from userinfo where id = ?");
+            //preparedStatement.setLong(1, id);
+            preparedStatement = statementStrategy.makeStatement(connection);
             preparedStatement.executeUpdate();
         } finally {
             try {
