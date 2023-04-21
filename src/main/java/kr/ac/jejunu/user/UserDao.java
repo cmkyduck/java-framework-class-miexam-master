@@ -13,19 +13,37 @@ public class UserDao {
         //Class.forName("com.mysql.cj.jdbc.Driver");
         //Connection connection = DriverManager.getConnection("jdbc:mysql://localhost/jeju", "root", "0000");
         //Connection connection = getConnection();
-        Connection connection = dataSource.getConnection();
-        PreparedStatement preparedStatement = connection.prepareStatement("select id, name, password from userinfo where id = ?");
-        preparedStatement.setLong(1, id);
-        ResultSet resultSet = preparedStatement.executeQuery();
-        resultSet.next();
-        User user = new User();
-        user.setId(resultSet.getLong("id"));
-        user.setName(resultSet.getString("name"));
-        user.setPassword(resultSet.getString("password"));
-        resultSet.close();
-        preparedStatement.close();
-        connection.close();
-
+        Connection connection = null;
+        PreparedStatement preparedStatement = null;
+        ResultSet resultSet = null;
+        User user;
+        try {
+            connection = dataSource.getConnection();
+            preparedStatement = connection.prepareStatement("select id, name, password from userinfo where id = ?");
+            preparedStatement.setLong(1, id);
+            resultSet = preparedStatement.executeQuery();
+            resultSet.next();
+            user = new User();
+            user.setId(resultSet.getLong("id"));
+            user.setName(resultSet.getString("name"));
+            user.setPassword(resultSet.getString("password"));
+        } finally {
+            try {
+                resultSet.close();
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+            try {
+                preparedStatement.close();
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+            try {
+                connection.close();
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+        }
         return user;
     }
 
@@ -33,19 +51,37 @@ public class UserDao {
         //Class.forName("com.mysql.cj.jdbc.Driver");
         //Connection connection = DriverManager.getConnection("jdbc:mysql://localhost/jeju", "root", "0000");
         //Connection connection = getConnection();
-        Connection connection = dataSource.getConnection();
-        PreparedStatement preparedStatement = connection.prepareStatement
-                ("insert into userinfo (name, password) values ( ?, ? )"
-                        , Statement.RETURN_GENERATED_KEYS);
-        preparedStatement.setString(1, user.getName());
-        preparedStatement.setString(2, user.getPassword());
-        preparedStatement.executeUpdate();
-        ResultSet resultSet = preparedStatement.getGeneratedKeys();
-        resultSet.next();
-        user.setId(resultSet.getLong(1));
-        resultSet.close();
-        preparedStatement.close();
-        connection.close();
+        Connection connection = null;
+        PreparedStatement preparedStatement = null;
+        ResultSet resultSet = null;
+        try {
+            connection = dataSource.getConnection();
+            preparedStatement = connection.prepareStatement
+                    ("insert into userinfo (name, password) values ( ?, ? )"
+                            , Statement.RETURN_GENERATED_KEYS);
+            preparedStatement.setString(1, user.getName());
+            preparedStatement.setString(2, user.getPassword());
+            preparedStatement.executeUpdate();
+            resultSet = preparedStatement.getGeneratedKeys();
+            resultSet.next();
+            user.setId(resultSet.getLong(1));
+        } finally {
+            try {
+                resultSet.close();
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+            try {
+                preparedStatement.close();
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+            try {
+                connection.close();
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+        }
     }
 
     //abstract public Connection getConnection() throws ClassNotFoundException, SQLException;
